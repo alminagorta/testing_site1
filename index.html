@@ -2,23 +2,40 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>D3 Example</title>
+  <title>Interactive Time Series Line Chart</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
     }
-    .bar {
-      fill: steelblue;
+    .line {
+      fill: none;
+      stroke: steelblue;
+      stroke-width: 2;
+    }
+    .axis-label {
+      font-size: 12px;
+      fill: #555;
+    }
+    .tooltip {
+      position: absolute;
+      text-align: center;
+      padding: 5px;
+      background-color: white;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      pointer-events: none;
+      visibility: hidden;
     }
   </style>
 </head>
 <body>
 
-  <h2>Simple D3 Bar Chart</h2>
-  <svg width="600" height="400"></svg>
+<h2>Interactive Time Series Line Chart</h2>
+<svg width="800" height="400"></svg>
+<div class="tooltip"></div>
 
-  <script src="script.js"></script>
+<script src="script.js"></script>
 
 </body>
 </html>

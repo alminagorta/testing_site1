@@ -48,31 +48,10 @@ d3.csv("data.csv").then(function(data) {
     .y(d => y(d.value));
 
   // Add the line path
-  svg.append("path")
+  const path = svg.append("path")
     .data([data])
     .attr("class", "line")
     .attr("d", line);
-
-  // Add circles to the line (interactive)
-  const circles = svg.selectAll("circle")
-    .data(data)
-    .enter()
-    .append("circle")
-    .attr("cx", d => x(d.date))
-    .attr("cy", d => y(d.value))
-    .attr("r", 5)
-    .attr("fill", "steelblue")
-    .on("mouseover", function(event, d) {
-      tooltip.style("visibility", "visible")
-        .text(`Date: ${d3.timeFormat("%Y-%m-%d")(d.date)} | Value: ${d.value}`);
-    })
-    .on("mousemove", function(event) {
-      tooltip.style("top", (event.pageY - 10) + "px")
-        .style("left", (event.pageX + 10) + "px");
-    })
-    .on("mouseout", function() {
-      tooltip.style("visibility", "hidden");
-    });
 
   // Dynamic update function (for example, based on button click or new data arrival)
   function updateChart(newData) {
@@ -86,30 +65,28 @@ d3.csv("data.csv").then(function(data) {
     x.domain(d3.extent(newData, d => d.date));
     y.domain([0, d3.max(newData, d => d.value)]);
 
-    // Update the line
-    svg.select(".line")
-      .data([newData])
-      .transition()
-      .duration(750)
-      .attr("d", line);
+    // Transition the line update
+    path.transition()
+      .duration(1000)
+      .attr("d", line(newData));
 
-    // Update the circles
-    const circleUpdate = svg.selectAll("circle")
+    // (Optional) Add dynamic interaction: update circles for points
+    const circles = svg.selectAll("circle")
       .data(newData);
 
-    circleUpdate.enter()
+    circles.enter()
       .append("circle")
       .attr("cx", d => x(d.date))
       .attr("cy", d => y(d.value))
       .attr("r", 5)
       .attr("fill", "steelblue")
-      .merge(circleUpdate)
+      .merge(circles)
       .transition()
-      .duration(750)
+      .duration(1000)
       .attr("cx", d => x(d.date))
       .attr("cy", d => y(d.value));
 
-    circleUpdate.exit().remove();
+    circles.exit().remove();
   }
 
   // Example of dynamically updating the chart with new data (can be triggered by a button or external event)

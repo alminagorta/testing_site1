@@ -10,12 +10,12 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:       #f7f4ef;
-  --surface:  #ffffff;
-  --border:   #e2ddd6;
-  --text:     #2c2825;
-  --muted:    #9c9389;
-  --elev:     #2c2825;
+  --bg:      #f7f4ef;
+  --surface: #ffffff;
+  --border:  #e2ddd6;
+  --text:    #2c2825;
+  --muted:   #9c9389;
+  --elev:    #2c2825;
 }
 
 body {
@@ -26,9 +26,7 @@ body {
   padding: 28px 24px;
 }
 
-header {
-  margin-bottom: 22px;
-}
+header { margin-bottom: 22px; }
 
 h1 {
   font-family: 'IBM Plex Mono', monospace;
@@ -46,10 +44,9 @@ h1 {
   font-weight: 300;
 }
 
-/* ── Layout: chart + sidebar ── */
+/* ── Layout ── */
 #layout {
   display: flex;
-  gap: 0;
   align-items: flex-start;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -60,19 +57,20 @@ h1 {
 #chart-wrap {
   flex: 1;
   min-width: 0;
-  padding: 20px 0 16px 4px;
+  padding: 20px 0 16px 0;
 }
 
-/* ── Right sidebar ── */
+/* ── Sidebar ── */
 #sidebar {
-  width: 168px;
+  width: 164px;
   flex-shrink: 0;
   border-left: 1px solid var(--border);
   background: #faf9f6;
-  padding: 16px 14px;
+  padding: 16px 12px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
+  align-self: stretch;
 }
 
 #sidebar-title {
@@ -81,17 +79,16 @@ h1 {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--muted);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--border);
 }
 
-/* Always-on rows (elevation + tiers) */
 .sidebar-static {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 0;
+  padding: 4px 8px;
   font-size: 11.5px;
   color: var(--muted);
 }
@@ -103,85 +100,87 @@ h1 {
   border-radius: 1px;
 }
 
-.sidebar-static .sw.dashed {
-  background: repeating-linear-gradient(
-    90deg, var(--c) 0, var(--c) 4px, transparent 4px, transparent 8px
-  );
-}
-
 .sidebar-divider {
   border: none;
   border-top: 1px solid var(--border);
-  margin: 6px 0;
+  margin: 4px 0;
 }
 
-/* Toggle rows for projection lines */
+.section-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 2px 8px 4px;
+}
+
+/* Toggle rows */
 .toggle-row {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 8px;
   padding: 5px 8px;
   border-radius: 6px;
   cursor: pointer;
   transition: background 0.12s;
   user-select: none;
-  border: 1px solid transparent;
 }
 
 .toggle-row:hover { background: #f0ede8; }
-
-.toggle-row.off {
-  opacity: 0.38;
-}
+.toggle-row.off   { opacity: 0.35; }
 
 .toggle-row .color-pill {
-  width: 22px;
+  width: 20px;
   height: 3px;
   border-radius: 2px;
   flex-shrink: 0;
-  transition: opacity 0.12s;
+}
+
+.toggle-row .color-pill.dashed {
+  height: 0;
+  border-top: 2px dashed transparent;
 }
 
 .toggle-row .lbl {
-  font-size: 11.5px;
+  font-size: 11px;
   font-family: 'IBM Plex Mono', monospace;
   color: var(--text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
 }
 
 .toggle-row .check {
   margin-left: auto;
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
   border-radius: 3px;
   border: 1.5px solid #ccc;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.12s, border-color 0.12s;
-  font-size: 9px;
+  font-size: 8px;
   color: #fff;
+  transition: background 0.12s, border-color 0.12s;
 }
 
-.toggle-row.on .check {
-  border-color: transparent;
-  /* background set inline */
-}
+.toggle-row.on .check { border-color: transparent; }
 
-/* All/None buttons */
+/* All / None */
 .ctrl-btns {
   display: flex;
-  gap: 6px;
-  margin-bottom: 4px;
+  gap: 5px;
+  margin-bottom: 2px;
 }
 
 .ctrl-btn {
   flex: 1;
   padding: 4px 0;
-  font-size: 10px;
+  font-size: 9.5px;
   font-family: 'IBM Plex Mono', monospace;
   background: transparent;
   border: 1px solid var(--border);
@@ -191,7 +190,7 @@ h1 {
   transition: border-color 0.12s, color 0.12s;
 }
 
-.ctrl-btn:hover { border-color: #aaa; color: var(--text); }
+.ctrl-btn:hover { border-color: #999; color: var(--text); }
 
 /* ── D3 chart styles ── */
 .axis path, .axis line {
@@ -208,9 +207,16 @@ h1 {
   font-size: 9.5px;
 }
 
+.y-axis-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9.5px;
+  fill: var(--muted);
+  text-anchor: middle;
+}
+
 .tier-line {
   fill: none;
-  stroke-width: 1.2px;
+  stroke-width: 1.3px;
   stroke-dasharray: 5,4;
 }
 
@@ -224,7 +230,6 @@ h1 {
   fill: none;
   stroke-width: 2px;
   stroke-linecap: round;
-  transition: opacity 0.2s;
 }
 
 #hover-line {
@@ -239,7 +244,6 @@ h1 {
   fill: var(--muted);
 }
 
-/* Tooltip */
 #tooltip {
   position: fixed;
   background: var(--text);
@@ -268,7 +272,7 @@ h1 {
   margin-bottom: 2px;
 }
 
-#tooltip .tt-val { font-weight: 500; }
+#tooltip .tt-val    { font-weight: 500; }
 #tooltip .tt-val.hi { color: #fff; }
 
 .brush .extent {
@@ -291,35 +295,26 @@ h1 {
   <div id="chart-wrap">
     <div id="chart"></div>
   </div>
+
   <div id="sidebar">
     <div id="sidebar-title">Series</div>
 
-    <!-- Static: always-on series -->
+    <!-- Observed always on -->
     <div class="sidebar-static">
-      <div class="sw" style="background:var(--elev);height:2px"></div>
+      <div class="sw" style="background:var(--elev)"></div>
       <span>Observed</span>
-    </div>
-    <div class="sidebar-static">
-      <div class="sw dashed" style="--c:#e07b39"></div>
-      <span>Mid Tier</span>
-    </div>
-    <div class="sidebar-static">
-      <div class="sw dashed" style="--c:#d4a847"></div>
-      <span>Lower Tier</span>
-    </div>
-    <div class="sidebar-static">
-      <div class="sw dashed" style="--c:#c0392b"></div>
-      <span>No Power</span>
     </div>
 
     <hr class="sidebar-divider">
+    <div class="section-label">Thresholds</div>
+    <div id="tier-toggles"></div>
 
+    <hr class="sidebar-divider">
+    <div class="section-label">Projections</div>
     <div class="ctrl-btns">
       <button class="ctrl-btn" id="btn-all">All</button>
       <button class="ctrl-btn" id="btn-none">None</button>
     </div>
-
-    <!-- Projection toggles injected by JS -->
     <div id="proj-toggles"></div>
   </div>
 </div>
@@ -327,339 +322,409 @@ h1 {
 <div id="tooltip"></div>
 
 <script>
-// ════════════════════════════════════════════════════
-//  INLINE DATA  — replace values with your real data
-//  Each snapshot column = a full projection line
-// ════════════════════════════════════════════════════
-var RAW = [
-  // Add or remove rows freely. 
-  // Snapshot columns carry the projected elevation for EVERY row
-  // where a projection exists; leave blank ("") where it doesn't start yet.
-  {date:"19640131", Elev:3414.6, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:"",     Aug_2021:"",     Sep_2021:"",     Mar_2026:""},
-  {date:"19700101", Elev:3680.0, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:"",     Aug_2021:"",     Sep_2021:"",     Mar_2026:""},
-  {date:"19800101", Elev:3694.0, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:"",     Aug_2021:"",     Sep_2021:"",     Mar_2026:""},
-  {date:"19900101", Elev:3688.0, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:"",     Aug_2021:"",     Sep_2021:"",     Mar_2026:""},
-  {date:"20000101", Elev:3670.0, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:"",     Aug_2021:"",     Sep_2021:"",     Mar_2026:""},
-  {date:"20050101", Elev:3598.0, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:"",     Aug_2021:"",     Sep_2021:"",     Mar_2026:""},
-  {date:"20100101", Elev:3635.0, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:"",     Aug_2021:"",     Sep_2021:"",     Mar_2026:""},
-  {date:"20150101", Elev:3596.0, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:"",     Aug_2021:"",     Sep_2021:"",     Mar_2026:""},
-  {date:"20180101", Elev:3588.0, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:"",     Aug_2021:"",     Sep_2021:"",     Mar_2026:""},
-  {date:"20200101", Elev:3581.0, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:"",     Aug_2021:"",     Sep_2021:"",     Mar_2026:""},
-  // Projections start here — each column diverges from the observed line
-  {date:"20210601", Elev:3554.3, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:3554.3, Aug_2021:3554.3, Sep_2021:3554.3, Mar_2026:3554.3},
-  {date:"20210801", Elev:3534.7, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:3545.0, Aug_2021:3534.7, Sep_2021:3534.7, Mar_2026:3534.7},
-  {date:"20210901", Elev:3528.9, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:3540.0, Aug_2021:3530.0, Sep_2021:3528.9, Mar_2026:3528.9},
-  {date:"20220101", Elev:3522.1, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:3550.0, Aug_2021:3535.0, Sep_2021:3525.0, Mar_2026:3522.1},
-  {date:"20230101", Elev:3568.3, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:3560.0, Aug_2021:3555.0, Sep_2021:3545.0, Mar_2026:3568.3},
-  {date:"20240101", Elev:3578.6, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:3565.0, Aug_2021:3562.0, Sep_2021:3558.0, Mar_2026:3578.6},
-  {date:"20250101", Elev:3580.0, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:3568.0, Aug_2021:3566.0, Sep_2021:3563.0, Mar_2026:3582.0},
-  {date:"20260301", Elev:3581.2, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:3570.0, Aug_2021:3569.0, Sep_2021:3567.0, Mar_2026:3581.2},
+// ══════════════════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════════════════
+var DATA_FILE = "reservoirData.tsv";
+
+var TIER_DEFS = [
+  { key:"Mid",   label:"Mid Tier",   color:"#e07b39" },
+  { key:"Lower", label:"Lower Tier", color:"#d4a847" },
+  { key:"NoPwr", label:"No Power",   color:"#c0392b" }
 ];
 
-// ════════════════════════════════════════════════════
-//  COLOUR PALETTE for projection lines
-// ════════════════════════════════════════════════════
 var PROJ_COLORS = [
   "#2563eb","#16a34a","#9333ea","#dc2626",
   "#0891b2","#d97706","#db2777","#059669",
   "#7c3aed","#b45309","#0284c7","#65a30d"
 ];
 
-var TIER_CONFIG = [
-  { key:"Mid",   color:"#e07b39" },
-  { key:"Lower", color:"#d4a847" },
-  { key:"NoPwr", color:"#c0392b" }
-];
+// ══════════════════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════════════════
+var parseDate  = d3.time.format("%Y%m%d").parse;
+var bisectDate = d3.bisector(function(d){ return d.date; }).left;
+var fmtN       = d3.format(",.1f");
+var fmtShort   = d3.time.format('%b %Y');
+var fmtLong    = d3.time.format('%B %d, %Y');
+var tierKeys   = TIER_DEFS.map(function(t){ return t.key; });
 
-// ════════════════════════════════════════════════════
-//  PARSE
-// ════════════════════════════════════════════════════
-var parseDate   = d3.time.format("%Y%m%d").parse;
-var bisectDate  = d3.bisector(function(d){ return d.date; }).left;
-var fmtN        = d3.format(",.1f");
-var fmtShort    = d3.time.format('%b %Y');
-var fmtLong     = d3.time.format('%B %d, %Y');
+// ══════════════════════════════════════════════════════
+//  LOAD DATA
+// ══════════════════════════════════════════════════════
+d3.tsv(DATA_FILE, function(error, raw) {
 
-var projKeys = Object.keys(RAW[0]).filter(function(k){
-  return k !== "date" && k !== "Elev" && k !== "Mid" && k !== "Lower" && k !== "NoPwr";
-});
-
-var rows = RAW.map(function(r){
-  var d = { date: parseDate(r.date), elev: +r.Elev || null };
-  TIER_CONFIG.forEach(function(t){ d[t.key] = +r[t.key] || null; });
-  projKeys.forEach(function(k){
-    var v = parseFloat(r[k]);
-    d[k] = isNaN(v) ? null : v;
-  });
-  return d;
-});
-
-var elevData = rows.filter(function(d){ return d.elev; });
-
-// ════════════════════════════════════════════════════
-//  DIMENSIONS
-// ════════════════════════════════════════════════════
-var margin = { top:18, right:18, bottom:78, left:62 },
-    H2     = 40,
-    totalW = Math.min(window.innerWidth - 230, 820),
-    W      = totalW - margin.left - margin.right,
-    H      = 380 - margin.top - margin.bottom;
-
-// ════════════════════════════════════════════════════
-//  SCALES
-// ════════════════════════════════════════════════════
-var xS  = d3.time.scale().range([0, W]);
-var xS2 = d3.time.scale().range([0, W]);
-var yS  = d3.scale.linear().range([H, 0]);
-
-xS.domain(d3.extent(rows, function(d){ return d.date; }));
-xS2.domain(xS.domain());
-
-var allVals = [];
-rows.forEach(function(d){
-  if (d.elev) allVals.push(d.elev);
-  projKeys.forEach(function(k){ if (d[k]) allVals.push(d[k]); });
-});
-yS.domain([d3.min(allVals) - 15, 3710]);
-
-var xAxis  = d3.svg.axis().scale(xS).orient("bottom").ticks(8);
-var xAxis2 = d3.svg.axis().scale(xS2).orient("bottom").ticks(5);
-var yAxis  = d3.svg.axis().scale(yS).orient("left").ticks(7)
-               .tickFormat(function(d){ return d3.format(",.0f")(d)+" ft"; });
-
-// ════════════════════════════════════════════════════
-//  SVG
-// ════════════════════════════════════════════════════
-var svg = d3.select("#chart").append("svg")
-    .attr("width",  W + margin.left + margin.right)
-    .attr("height", H + margin.top  + margin.bottom + H2 + 20)
-  .append("g")
-    .attr("transform","translate("+margin.left+","+margin.top+")");
-
-svg.append("defs").append("clipPath").attr("id","clip")
-  .append("rect").attr("width",W).attr("height",H+4);
-
-// Mouse tracker
-svg.append("rect").attr("id","mt")
-    .attr("width",W).attr("height",H)
-    .style("fill","transparent").style("cursor","crosshair");
-
-// ════════════════════════════════════════════════════
-//  TIER LINES
-// ════════════════════════════════════════════════════
-TIER_CONFIG.forEach(function(t){
-  var val = rows[0][t.key]; if (!val) return;
-  svg.append("line").attr("class","tier-line")
-      .attr("x1",0).attr("x2",W)
-      .attr("y1",yS(val)).attr("y2",yS(val))
-      .style("stroke", t.color)
-      .attr("clip-path","url(#clip)");
-});
-
-// ════════════════════════════════════════════════════
-//  LINE GENERATORS
-// ════════════════════════════════════════════════════
-function makeLineGen(accessor){
-  return d3.svg.line()
-    .interpolate("monotone")
-    .x(function(d){ return xS(d.date); })
-    .y(function(d){ return yS(accessor(d)); })
-    .defined(function(d){ return accessor(d) !== null; });
-}
-
-var elevLine = makeLineGen(function(d){ return d.elev; });
-
-// Draw area under observed line
-var elevArea = d3.svg.area()
-    .interpolate("monotone")
-    .x(function(d){ return xS(d.date); })
-    .y0(H).y1(function(d){ return yS(d.elev); })
-    .defined(function(d){ return d.elev; });
-
-svg.append("defs").append("linearGradient").attr("id","ag")
-    .attr("x1","0").attr("x2","0").attr("y1","0").attr("y2","1")
-    .call(function(g){
-      g.append("stop").attr("offset","0%").attr("stop-color","#2c2825").attr("stop-opacity",0.10);
-      g.append("stop").attr("offset","100%").attr("stop-color","#2c2825").attr("stop-opacity",0.01);
-    });
-
-var areaPath = svg.append("path")
-    .datum(elevData).attr("fill","url(#ag)")
-    .attr("clip-path","url(#clip)").attr("d", elevArea);
-
-var elevPath = svg.append("path")
-    .datum(elevData).attr("class","elev-main")
-    .attr("clip-path","url(#clip)").attr("d", elevLine);
-
-// ════════════════════════════════════════════════════
-//  PROJECTION LINES  (one per snapshot column)
-// ════════════════════════════════════════════════════
-var projState = {};   // key → { path, visible, color }
-
-projKeys.forEach(function(key, ci){
-  var color   = PROJ_COLORS[ci % PROJ_COLORS.length];
-  var lineGen = makeLineGen(function(d){ return d[key]; });
-
-  var path = svg.append("path")
-      .datum(rows)
-      .attr("class","proj-line")
-      .attr("clip-path","url(#clip)")
-      .attr("d", lineGen)
-      .style("stroke", color);
-
-  projState[key] = { path: path, lineGen: lineGen, visible: true, color: color };
-});
-
-// ════════════════════════════════════════════════════
-//  AXES
-// ════════════════════════════════════════════════════
-svg.append("g").attr("class","x axis")
-    .attr("transform","translate(0,"+H+")")
-    .call(xAxis);
-
-svg.append("g").attr("class","y axis").call(yAxis)
-  .append("text")
-    .attr("transform","rotate(-90)")
-    .attr("y",-54).attr("x",-8).attr("dy",".71em")
-    .style("text-anchor","end").style("fill","#9c9389").style("font-size","10px")
-    .text("Elevation (ft)");
-
-// ════════════════════════════════════════════════════
-//  BRUSH / CONTEXT
-// ════════════════════════════════════════════════════
-var ctxY = H + margin.top + margin.bottom - 14;
-var ctx  = svg.append("g").attr("transform","translate(0,"+ctxY+")");
-
-var ctxArea = d3.svg.area().interpolate("monotone")
-    .x(function(d){ return xS2(d.date); }).y0(H2).y1(0);
-
-ctx.append("path").datum(elevData).attr("class","context-area").attr("d", ctxArea);
-
-var brush = d3.svg.brush().x(xS2).on("brush", onBrush);
-
-ctx.append("g").attr("class","x axis").attr("transform","translate(0,"+H2+")")
-    .call(xAxis2);
-ctx.append("g").attr("class","x brush").call(brush)
-    .selectAll("rect").attr("height", H2);
-
-function onBrush(){
-  xS.domain(brush.empty() ? xS2.domain() : brush.extent());
-  svg.select(".x.axis").transition().call(xAxis);
-  redrawLines();
-}
-
-function redrawLines(){
-  elevPath.attr("d", elevLine(elevData));
-  areaPath.attr("d", elevArea(elevData));
-  projKeys.forEach(function(key){
-    var s = projState[key];
-    s.path.attr("d", s.lineGen(rows));
-  });
-  // Redraw tier lines x2 (they're fixed y, just stretch x)
-  svg.selectAll(".tier-line").attr("x2", W);
-}
-
-// ════════════════════════════════════════════════════
-//  HOVER / TOOLTIP
-// ════════════════════════════════════════════════════
-var hoverG = svg.append("g");
-var hoverLine = hoverG.append("line").attr("id","hover-line")
-    .attr("y1",0).attr("y2",H).style("opacity",1e-6).style("pointer-events","none");
-var hoverTxt = hoverG.append("text").attr("class","hover-date-text")
-    .attr("y",-5).style("opacity",1e-6);
-
-var tooltip = d3.select("#tooltip");
-
-d3.select("#mt")
-  .on("mousemove", function(){
-    var mx = d3.mouse(this)[0];
-    var x0 = xS.invert(mx);
-    var i  = bisectDate(rows, x0, 1);
-    if (i <= 0 || i >= rows.length) return;
-    var d0 = rows[i-1], d1 = rows[i];
-    var d  = (x0 - d0.date > d1.date - x0) ? d1 : d0;
-    if (!d || !d.date) return;
-
-    hoverLine.attr("x1",mx).attr("x2",mx).style("opacity",1);
-    hoverTxt.attr("x", mx < W-70 ? mx+6 : mx-64).text(fmtShort(d.date)).style("opacity",1);
-
-    var html = '<div class="tt-date">'+fmtLong(d.date)+'</div>';
-    if (d.elev) html += row("Observed", d.elev, true);
-    projKeys.forEach(function(key){
-      if (projState[key].visible && d[key] !== null)
-        html += rowColored(key.replace(/_/g," "), d[key], projState[key].color);
-    });
-
-    tooltip.html(html).style("opacity",1)
-      .style("left",(d3.event.clientX+16)+"px")
-      .style("top", (d3.event.clientY-20)+"px");
-  })
-  .on("mouseout", function(){
-    hoverLine.style("opacity",1e-6);
-    hoverTxt.style("opacity",1e-6);
-    tooltip.style("opacity",0);
-  });
-
-function row(label, val, hi){
-  return '<div class="tt-row"><span>'+label+'</span>' +
-         '<span class="tt-val'+(hi?" hi":"")+'">'+fmtN(val)+' ft</span></div>';
-}
-function rowColored(label, val, color){
-  return '<div class="tt-row"><span style="color:'+color+'">'+label+'</span>' +
-         '<span class="tt-val" style="color:'+color+'">'+fmtN(val)+' ft</span></div>';
-}
-
-// ════════════════════════════════════════════════════
-//  SIDEBAR TOGGLE ROWS
-// ════════════════════════════════════════════════════
-var toggleContainer = d3.select("#proj-toggles");
-
-projKeys.forEach(function(key){
-  var s     = projState[key];
-  var label = key.replace(/_/g," ");
-
-  var row = toggleContainer.append("div")
-      .attr("class","toggle-row on")
-      .attr("id","tr-"+key)
-      .on("click", function(){ toggleProj(key); });
-
-  row.append("div").attr("class","color-pill")
-      .style("background", s.color);
-
-  row.append("span").attr("class","lbl").text(label);
-
-  row.append("div").attr("class","check")
-      .style("background", s.color)
-      .html("✓");
-});
-
-// All / None buttons
-document.getElementById("btn-all").addEventListener("click", function(){
-  projKeys.forEach(function(k){ if (!projState[k].visible) toggleProj(k); });
-});
-document.getElementById("btn-none").addEventListener("click", function(){
-  projKeys.forEach(function(k){ if (projState[k].visible) toggleProj(k); });
-});
-
-function toggleProj(key){
-  var s = projState[key];
-  s.visible = !s.visible;
-
-  s.path.transition().duration(200)
-      .style("opacity", s.visible ? 1 : 0)
-      .style("display", null);
-
-  var rowEl = d3.select("#tr-"+key);
-  if (s.visible){
-    rowEl.attr("class","toggle-row on");
-    rowEl.select(".check").style("background", s.color).html("✓");
-    rowEl.select(".color-pill").style("background", s.color);
-  } else {
-    rowEl.attr("class","toggle-row off");
-    rowEl.select(".check").style("background","transparent").html("");
-    rowEl.select(".color-pill").style("background","#ccc");
+  if (error) {
+    d3.select("#chart-wrap").append("p")
+      .style("color","#c0392b").style("padding","20px")
+      .text("Cannot load " + DATA_FILE +
+            " — run: python -m http.server 8000  then open http://localhost:8000");
+    console.error(error);
+    return;
   }
-}
+
+  // ── Identify projection columns ──
+  var allCols  = d3.keys(raw[0]);
+  var projKeys = allCols.filter(function(k){
+    return k !== "date" && k !== "Elev" && tierKeys.indexOf(k) === -1;
+  });
+
+  // ── Parse rows ──
+  var rows = raw.map(function(r){
+    var d = { date: parseDate(r.date.trim()), elev: parseFloat(r.Elev) || null };
+    TIER_DEFS.forEach(function(t){ d[t.key] = parseFloat(r[t.key]) || null; });
+    projKeys.forEach(function(k){
+      var v = parseFloat(r[k]);
+      d[k] = isNaN(v) ? null : v;
+    });
+    return d;
+  });
+
+  var elevData = rows.filter(function(d){ return d.elev; });
+
+  // ══════════════════════════════════════════════════════
+  //  DIMENSIONS
+  //  FIX 1 – left margin wide enough so tick labels never
+  //           touch the rotated y-axis title.
+  //  FIX 2 – right margin minimal so line fills full width.
+  // ══════════════════════════════════════════════════════
+  var margin = { top:18, right:6, bottom:78, left:72 },
+      H2     = 40,
+      containerW = document.getElementById("chart-wrap").clientWidth || 760,
+      W      = containerW - margin.left - margin.right,
+      H      = 360 - margin.top - margin.bottom;
+
+  // ── Scales ──
+  var xS  = d3.time.scale().range([0, W]);
+  var xS2 = d3.time.scale().range([0, W]);
+  var yS  = d3.scale.linear().range([H, 0]);
+
+  // FIX 2: domain = exact data extent, zero padding on right
+  xS.domain(d3.extent(rows, function(d){ return d.date; }));
+  xS2.domain(xS.domain());
+
+  var allVals = [];
+  rows.forEach(function(d){
+    if (d.elev) allVals.push(d.elev);
+    projKeys.forEach(function(k){ if (d[k]) allVals.push(d[k]); });
+    TIER_DEFS.forEach(function(t){ if (d[t.key]) allVals.push(d[t.key]); });
+  });
+  yS.domain([d3.min(allVals) - 15, d3.max(allVals) + 20]);
+
+  // FIX 1: no "ft" suffix on tick labels keeps them short and
+  //        avoids clashing with the rotated label beside them.
+  var xAxis  = d3.svg.axis().scale(xS).orient("bottom").ticks(8);
+  var xAxis2 = d3.svg.axis().scale(xS2).orient("bottom").ticks(5);
+  var yAxis  = d3.svg.axis().scale(yS).orient("left").ticks(7)
+                 .tickFormat(d3.format(",d"));   // e.g. "3,550" not "3,550 ft"
+
+  // ══════════════════════════════════════════════════════
+  //  SVG
+  // ══════════════════════════════════════════════════════
+  var svg = d3.select("#chart").append("svg")
+      .attr("width",  W + margin.left + margin.right)
+      .attr("height", H + margin.top  + margin.bottom + H2 + 24)
+    .append("g")
+      .attr("transform","translate("+margin.left+","+margin.top+")");
+
+  svg.append("defs").append("clipPath").attr("id","clip")
+    .append("rect").attr("width",W).attr("height",H+4);
+
+  svg.append("rect").attr("id","mt")
+      .attr("width",W).attr("height",H)
+      .style("fill","transparent").style("cursor","crosshair");
+
+  // ══════════════════════════════════════════════════════
+  //  GENERATORS
+  // ══════════════════════════════════════════════════════
+  function makeLine(acc){
+    return d3.svg.line()
+      .interpolate("monotone")
+      .x(function(d){ return xS(d.date); })
+      .y(function(d){ return yS(acc(d)); })
+      .defined(function(d){ return acc(d) !== null; });
+  }
+
+  var elevLine = makeLine(function(d){ return d.elev; });
+  var elevArea = d3.svg.area()
+      .interpolate("monotone")
+      .x(function(d){ return xS(d.date); })
+      .y0(H).y1(function(d){ return yS(d.elev); })
+      .defined(function(d){ return d.elev; });
+
+  svg.append("defs").append("linearGradient").attr("id","ag")
+      .attr("x1","0").attr("x2","0").attr("y1","0").attr("y2","1")
+      .call(function(g){
+        g.append("stop").attr("offset","0%")
+          .attr("stop-color","#2c2825").attr("stop-opacity",0.10);
+        g.append("stop").attr("offset","100%")
+          .attr("stop-color","#2c2825").attr("stop-opacity",0.01);
+      });
+
+  // ══════════════════════════════════════════════════════
+  //  TIER LINES  (drawn first)
+  // ══════════════════════════════════════════════════════
+  var tierState = {};
+
+  TIER_DEFS.forEach(function(t){
+    var sample = rows.find(function(r){ return r[t.key]; });
+    if (!sample) return;
+    var val = sample[t.key];
+
+    var ln = svg.append("line")
+        .attr("class","tier-line")
+        .attr("x1",0).attr("x2",W)
+        .attr("y1", yS(val)).attr("y2", yS(val))
+        .style("stroke", t.color)
+        .attr("clip-path","url(#clip)");
+
+    tierState[t.key] = { line:ln, visible:true, color:t.color, val:val, label:t.label };
+  });
+
+  // ══════════════════════════════════════════════════════
+  //  ELEVATION AREA + LINE
+  // ══════════════════════════════════════════════════════
+  var areaPath = svg.append("path")
+      .datum(elevData).attr("fill","url(#ag)")
+      .attr("clip-path","url(#clip)").attr("d", elevArea);
+
+  var elevPath = svg.append("path")
+      .datum(elevData).attr("class","elev-main")
+      .attr("clip-path","url(#clip)").attr("d", elevLine);
+
+  // ══════════════════════════════════════════════════════
+  //  PROJECTION LINES
+  // ══════════════════════════════════════════════════════
+  var projState = {};
+
+  projKeys.forEach(function(key, ci){
+    var color   = PROJ_COLORS[ci % PROJ_COLORS.length];
+    var lineGen = makeLine(function(d){ return d[key]; });
+
+    var path = svg.append("path")
+        .datum(rows)
+        .attr("class","proj-line")
+        .attr("clip-path","url(#clip)")
+        .attr("d", lineGen)
+        .style("stroke", color)
+        .style("opacity", 1);
+
+    projState[key] = { path:path, lineGen:lineGen, visible:true, color:color };
+  });
+
+  // ══════════════════════════════════════════════════════
+  //  AXES
+  // ══════════════════════════════════════════════════════
+  svg.append("g").attr("class","x axis")
+      .attr("transform","translate(0,"+H+")")
+      .call(xAxis);
+
+  var yAxisG = svg.append("g").attr("class","y axis").call(yAxis);
+
+  // FIX 1: measure actual rendered tick-label width, then position
+  // the rotated title far enough left to clear them with a gap.
+  var maxTickW = 0;
+  yAxisG.selectAll(".tick text").each(function(){
+    var w = this.getBBox().width;
+    if (w > maxTickW) maxTickW = w;
+  });
+  // labelOffset = how far left of the axis line the title sits
+  var labelOffset = -(maxTickW + 18);  // 18 px gap between ticks and title
+
+  yAxisG.append("text")
+      .attr("class","y-axis-label")
+      .attr("transform","rotate(-90)")
+      // after rotation: x maps to the original y (along the axis), y maps leftward
+      .attr("x", -(H / 2))      // centre of axis height
+      .attr("y", labelOffset)
+      .attr("dy","0.35em")
+      .text("Elevation (ft)");
+
+  // ══════════════════════════════════════════════════════
+  //  BRUSH / CONTEXT
+  // ══════════════════════════════════════════════════════
+  var ctxY = H + margin.top + margin.bottom - 14;
+  var ctx  = svg.append("g").attr("transform","translate(0,"+ctxY+")");
+
+  var ctxArea = d3.svg.area().interpolate("monotone")
+      .x(function(d){ return xS2(d.date); }).y0(H2).y1(0);
+
+  ctx.append("path").datum(elevData)
+      .attr("class","context-area").attr("d", ctxArea);
+
+  var brush = d3.svg.brush().x(xS2).on("brush", onBrush);
+
+  ctx.append("g").attr("class","x axis")
+      .attr("transform","translate(0,"+H2+")")
+      .call(xAxis2);
+  ctx.append("g").attr("class","x brush").call(brush)
+      .selectAll("rect").attr("height", H2);
+
+  function onBrush(){
+    xS.domain(brush.empty() ? xS2.domain() : brush.extent());
+    svg.select(".x.axis").transition().call(xAxis);
+    redrawLines();
+  }
+
+  function redrawLines(){
+    elevPath.attr("d", elevLine(elevData));
+    areaPath.attr("d", elevArea(elevData));
+    projKeys.forEach(function(k){
+      projState[k].path.attr("d", projState[k].lineGen(rows));
+    });
+    Object.keys(tierState).forEach(function(k){
+      tierState[k].line.attr("x1",0).attr("x2",W);
+    });
+  }
+
+  // ══════════════════════════════════════════════════════
+  //  HOVER / TOOLTIP
+  // ══════════════════════════════════════════════════════
+  var hoverG    = svg.append("g");
+  var hoverLine = hoverG.append("line").attr("id","hover-line")
+      .attr("y1",0).attr("y2",H)
+      .style("opacity",1e-6).style("pointer-events","none");
+  var hoverTxt  = hoverG.append("text").attr("class","hover-date-text")
+      .attr("y",-5).style("opacity",1e-6);
+  var tooltip   = d3.select("#tooltip");
+
+  d3.select("#mt")
+    .on("mousemove", function(){
+      var mx = d3.mouse(this)[0];
+      var x0 = xS.invert(mx);
+      var i  = bisectDate(rows, x0, 1);
+      if (i <= 0 || i >= rows.length) return;
+      var d0 = rows[i-1], d1 = rows[i];
+      var d  = (x0 - d0.date > d1.date - x0) ? d1 : d0;
+      if (!d || !d.date) return;
+
+      hoverLine.attr("x1",mx).attr("x2",mx).style("opacity",1);
+      hoverTxt.attr("x", mx < W-70 ? mx+6 : mx-68)
+               .text(fmtShort(d.date)).style("opacity",1);
+
+      var html = '<div class="tt-date">'+fmtLong(d.date)+'</div>';
+      if (d.elev) html += ttRow("Observed", d.elev, "#fff", true);
+
+      TIER_DEFS.forEach(function(t){
+        if (tierState[t.key] && tierState[t.key].visible && d[t.key])
+          html += ttRow(t.label, d[t.key], t.color, false);
+      });
+      projKeys.forEach(function(key){
+        if (projState[key].visible && d[key] !== null)
+          html += ttRow(key.replace(/_/g," "), d[key], projState[key].color, false);
+      });
+
+      tooltip.html(html).style("opacity",1)
+        .style("left",(d3.event.clientX+16)+"px")
+        .style("top", (d3.event.clientY-20)+"px");
+    })
+    .on("mouseout", function(){
+      hoverLine.style("opacity",1e-6);
+      hoverTxt.style("opacity",1e-6);
+      tooltip.style("opacity",0);
+    });
+
+  function ttRow(label, val, color, hi){
+    return '<div class="tt-row">'+
+      '<span style="color:'+color+'">'+label+'</span>'+
+      '<span class="tt-val'+(hi?" hi":"") +'" style="color:'+color+'">'+
+      fmtN(val)+' ft</span></div>';
+  }
+
+  // ══════════════════════════════════════════════════════
+  //  SIDEBAR — TIER TOGGLES  (FIX 4)
+  // ══════════════════════════════════════════════════════
+  var tierContainer = d3.select("#tier-toggles");
+
+  TIER_DEFS.forEach(function(t){
+    if (!tierState[t.key]) return;
+    var s = tierState[t.key];
+
+    var rowEl = tierContainer.append("div")
+        .attr("class","toggle-row on")
+        .attr("id","ttr-"+t.key)
+        .on("click", function(){ toggleTier(t.key); });
+
+    // dashed swatch rendered via inline SVG so it exactly mirrors the chart line
+    rowEl.append("svg")
+        .attr("width","22").attr("height","8")
+        .style("flex-shrink","0")
+        .append("line")
+          .attr("x1","0").attr("y1","4").attr("x2","22").attr("y2","4")
+          .attr("stroke", s.color).attr("stroke-width","2")
+          .attr("stroke-dasharray","4,3");
+
+    rowEl.append("span").attr("class","lbl").text(t.label);
+
+    rowEl.append("div").attr("class","check")
+        .style("background", s.color).html("✓");
+  });
+
+  function toggleTier(key){
+    var s = tierState[key];
+    s.visible = !s.visible;
+    s.line.transition().duration(180).style("opacity", s.visible ? 1 : 0);
+
+    var rowEl = d3.select("#ttr-"+key);
+    if (s.visible){
+      rowEl.attr("class","toggle-row on");
+      rowEl.select(".check").style("background", s.color).html("✓");
+      rowEl.select("line").attr("stroke", s.color);
+    } else {
+      rowEl.attr("class","toggle-row off");
+      rowEl.select(".check").style("background","transparent").html("");
+      rowEl.select("line").attr("stroke","#ccc");
+    }
+  }
+
+  // ══════════════════════════════════════════════════════
+  //  SIDEBAR — PROJECTION TOGGLES
+  // ══════════════════════════════════════════════════════
+  var projContainer = d3.select("#proj-toggles");
+
+  projKeys.forEach(function(key){
+    var s     = projState[key];
+    var label = key.replace(/_/g," ");
+
+    var rowEl = projContainer.append("div")
+        .attr("class","toggle-row on")
+        .attr("id","ptr-"+key)
+        .on("click", function(){ toggleProj(key); });
+
+    rowEl.append("div").attr("class","color-pill")
+        .style("background", s.color);
+
+    rowEl.append("span").attr("class","lbl").text(label);
+
+    rowEl.append("div").attr("class","check")
+        .style("background", s.color).html("✓");
+  });
+
+  document.getElementById("btn-all").addEventListener("click", function(){
+    projKeys.forEach(function(k){ if (!projState[k].visible) toggleProj(k); });
+  });
+  document.getElementById("btn-none").addEventListener("click", function(){
+    projKeys.forEach(function(k){ if (projState[k].visible) toggleProj(k); });
+  });
+
+  function toggleProj(key){
+    var s = projState[key];
+    s.visible = !s.visible;
+    s.path.transition().duration(180).style("opacity", s.visible ? 1 : 0);
+
+    var rowEl = d3.select("#ptr-"+key);
+    if (s.visible){
+      rowEl.attr("class","toggle-row on");
+      rowEl.select(".check").style("background", s.color).html("✓");
+      rowEl.select(".color-pill").style("background", s.color);
+    } else {
+      rowEl.attr("class","toggle-row off");
+      rowEl.select(".check").style("background","transparent").html("");
+      rowEl.select(".color-pill").style("background","#ccc");
+    }
+  }
+
+}); // end d3.tsv
 </script>
 </body>
 </html>

@@ -1,41 +1,665 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Interactive Time Series Line Chart</title>
-  <script src="https://d3js.org/d3.v7.min.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-    }
-    .line {
-      fill: none;
-      stroke: steelblue;
-      stroke-width: 2;
-    }
-    .axis-label {
-      font-size: 12px;
-      fill: #555;
-    }
-    .tooltip {
-      position: absolute;
-      text-align: center;
-      padding: 5px;
-      background-color: white;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      pointer-events: none;
-      visibility: hidden;
-    }
-  </style>
+<meta charset="utf-8">
+<title>Reservoir Elevation — Projections</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #f7f4ef;
+  --surface:  #ffffff;
+  --border:   #e2ddd6;
+  --text:     #2c2825;
+  --muted:    #9c9389;
+  --elev:     #2c2825;
+}
+
+body {
+  background: var(--bg);
+  font-family: 'IBM Plex Sans', sans-serif;
+  color: var(--text);
+  min-height: 100vh;
+  padding: 28px 24px;
+}
+
+header {
+  margin-bottom: 22px;
+}
+
+h1 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.subtitle {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 3px;
+  font-weight: 300;
+}
+
+/* ── Layout: chart + sidebar ── */
+#layout {
+  display: flex;
+  gap: 0;
+  align-items: flex-start;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+#chart-wrap {
+  flex: 1;
+  min-width: 0;
+  padding: 20px 0 16px 4px;
+}
+
+/* ── Right sidebar ── */
+#sidebar {
+  width: 168px;
+  flex-shrink: 0;
+  border-left: 1px solid var(--border);
+  background: #faf9f6;
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#sidebar-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Always-on rows (elevation + tiers) */
+.sidebar-static {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.sidebar-static .sw {
+  width: 22px;
+  height: 2px;
+  flex-shrink: 0;
+  border-radius: 1px;
+}
+
+.sidebar-static .sw.dashed {
+  background: repeating-linear-gradient(
+    90deg, var(--c) 0, var(--c) 4px, transparent 4px, transparent 8px
+  );
+}
+
+.sidebar-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 6px 0;
+}
+
+/* Toggle rows for projection lines */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.12s;
+  user-select: none;
+  border: 1px solid transparent;
+}
+
+.toggle-row:hover { background: #f0ede8; }
+
+.toggle-row.off {
+  opacity: 0.38;
+}
+
+.toggle-row .color-pill {
+  width: 22px;
+  height: 3px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  transition: opacity 0.12s;
+}
+
+.toggle-row .lbl {
+  font-size: 11.5px;
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toggle-row .check {
+  margin-left: auto;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1.5px solid #ccc;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s, border-color 0.12s;
+  font-size: 9px;
+  color: #fff;
+}
+
+.toggle-row.on .check {
+  border-color: transparent;
+  /* background set inline */
+}
+
+/* All/None buttons */
+.ctrl-btns {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.ctrl-btn {
+  flex: 1;
+  padding: 4px 0;
+  font-size: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--muted);
+  transition: border-color 0.12s, color 0.12s;
+}
+
+.ctrl-btn:hover { border-color: #aaa; color: var(--text); }
+
+/* ── D3 chart styles ── */
+.axis path, .axis line {
+  fill: none;
+  stroke: var(--border);
+  shape-rendering: crispEdges;
+}
+
+.x.axis path { display: none; }
+
+.axis text {
+  fill: var(--muted);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9.5px;
+}
+
+.tier-line {
+  fill: none;
+  stroke-width: 1.2px;
+  stroke-dasharray: 5,4;
+}
+
+.elev-main {
+  fill: none;
+  stroke: var(--elev);
+  stroke-width: 2px;
+}
+
+.proj-line {
+  fill: none;
+  stroke-width: 2px;
+  stroke-linecap: round;
+  transition: opacity 0.2s;
+}
+
+#hover-line {
+  stroke: #ccc;
+  stroke-width: 1px;
+  pointer-events: none;
+}
+
+.hover-date-text {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  fill: var(--muted);
+}
+
+/* Tooltip */
+#tooltip {
+  position: fixed;
+  background: var(--text);
+  color: #f7f4ef;
+  border-radius: 6px;
+  padding: 9px 13px;
+  font-size: 11.5px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.1s;
+  z-index: 200;
+  min-width: 160px;
+}
+
+#tooltip .tt-date {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: #a09888;
+  margin-bottom: 6px;
+}
+
+#tooltip .tt-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 2px;
+}
+
+#tooltip .tt-val { font-weight: 500; }
+#tooltip .tt-val.hi { color: #fff; }
+
+.brush .extent {
+  stroke: #aaa;
+  fill: rgba(0,0,0,0.05);
+  shape-rendering: crispEdges;
+}
+
+.context-area { fill: #e8e4de; }
+</style>
 </head>
 <body>
 
-<h2>Interactive Time Series Line Chart</h2>
-<svg width="800" height="400"></svg>
-<div class="tooltip"></div>
+<header>
+  <h1>Reservoir Elevation — Projections</h1>
+  <p class="subtitle">Each date column is an independent projection line · click legend to toggle</p>
+</header>
 
-<script src="script.js"></script>
+<div id="layout">
+  <div id="chart-wrap">
+    <div id="chart"></div>
+  </div>
+  <div id="sidebar">
+    <div id="sidebar-title">Series</div>
 
+    <!-- Static: always-on series -->
+    <div class="sidebar-static">
+      <div class="sw" style="background:var(--elev);height:2px"></div>
+      <span>Observed</span>
+    </div>
+    <div class="sidebar-static">
+      <div class="sw dashed" style="--c:#e07b39"></div>
+      <span>Mid Tier</span>
+    </div>
+    <div class="sidebar-static">
+      <div class="sw dashed" style="--c:#d4a847"></div>
+      <span>Lower Tier</span>
+    </div>
+    <div class="sidebar-static">
+      <div class="sw dashed" style="--c:#c0392b"></div>
+      <span>No Power</span>
+    </div>
+
+    <hr class="sidebar-divider">
+
+    <div class="ctrl-btns">
+      <button class="ctrl-btn" id="btn-all">All</button>
+      <button class="ctrl-btn" id="btn-none">None</button>
+    </div>
+
+    <!-- Projection toggles injected by JS -->
+    <div id="proj-toggles"></div>
+  </div>
+</div>
+
+<div id="tooltip"></div>
+
+<script>
+// ════════════════════════════════════════════════════
+//  INLINE DATA  — replace values with your real data
+//  Each snapshot column = a full projection line
+// ════════════════════════════════════════════════════
+var RAW = [
+  // Add or remove rows freely. 
+  // Snapshot columns carry the projected elevation for EVERY row
+  // where a projection exists; leave blank ("") where it doesn't start yet.
+  {date:"19640131", Elev:3414.6, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:"",     Aug_2021:"",     Sep_2021:"",     Mar_2026:""},
+  {date:"19700101", Elev:3680.0, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:"",     Aug_2021:"",     Sep_2021:"",     Mar_2026:""},
+  {date:"19800101", Elev:3694.0, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:"",     Aug_2021:"",     Sep_2021:"",     Mar_2026:""},
+  {date:"19900101", Elev:3688.0, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:"",     Aug_2021:"",     Sep_2021:"",     Mar_2026:""},
+  {date:"20000101", Elev:3670.0, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:"",     Aug_2021:"",     Sep_2021:"",     Mar_2026:""},
+  {date:"20050101", Elev:3598.0, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:"",     Aug_2021:"",     Sep_2021:"",     Mar_2026:""},
+  {date:"20100101", Elev:3635.0, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:"",     Aug_2021:"",     Sep_2021:"",     Mar_2026:""},
+  {date:"20150101", Elev:3596.0, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:"",     Aug_2021:"",     Sep_2021:"",     Mar_2026:""},
+  {date:"20180101", Elev:3588.0, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:"",     Aug_2021:"",     Sep_2021:"",     Mar_2026:""},
+  {date:"20200101", Elev:3581.0, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:"",     Aug_2021:"",     Sep_2021:"",     Mar_2026:""},
+  // Projections start here — each column diverges from the observed line
+  {date:"20210601", Elev:3554.3, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:3554.3, Aug_2021:3554.3, Sep_2021:3554.3, Mar_2026:3554.3},
+  {date:"20210801", Elev:3534.7, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:3545.0, Aug_2021:3534.7, Sep_2021:3534.7, Mar_2026:3534.7},
+  {date:"20210901", Elev:3528.9, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:3540.0, Aug_2021:3530.0, Sep_2021:3528.9, Mar_2026:3528.9},
+  {date:"20220101", Elev:3522.1, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:3550.0, Aug_2021:3535.0, Sep_2021:3525.0, Mar_2026:3522.1},
+  {date:"20230101", Elev:3568.3, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:3560.0, Aug_2021:3555.0, Sep_2021:3545.0, Mar_2026:3568.3},
+  {date:"20240101", Elev:3578.6, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:3565.0, Aug_2021:3562.0, Sep_2021:3558.0, Mar_2026:3578.6},
+  {date:"20250101", Elev:3580.0, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:3568.0, Aug_2021:3566.0, Sep_2021:3563.0, Mar_2026:3582.0},
+  {date:"20260301", Elev:3581.2, Mid:3575, Lower:3525, NoPwr:3490, Jun_2021:3570.0, Aug_2021:3569.0, Sep_2021:3567.0, Mar_2026:3581.2},
+];
+
+// ════════════════════════════════════════════════════
+//  COLOUR PALETTE for projection lines
+// ════════════════════════════════════════════════════
+var PROJ_COLORS = [
+  "#2563eb","#16a34a","#9333ea","#dc2626",
+  "#0891b2","#d97706","#db2777","#059669",
+  "#7c3aed","#b45309","#0284c7","#65a30d"
+];
+
+var TIER_CONFIG = [
+  { key:"Mid",   color:"#e07b39" },
+  { key:"Lower", color:"#d4a847" },
+  { key:"NoPwr", color:"#c0392b" }
+];
+
+// ════════════════════════════════════════════════════
+//  PARSE
+// ════════════════════════════════════════════════════
+var parseDate   = d3.time.format("%Y%m%d").parse;
+var bisectDate  = d3.bisector(function(d){ return d.date; }).left;
+var fmtN        = d3.format(",.1f");
+var fmtShort    = d3.time.format('%b %Y');
+var fmtLong     = d3.time.format('%B %d, %Y');
+
+var projKeys = Object.keys(RAW[0]).filter(function(k){
+  return k !== "date" && k !== "Elev" && k !== "Mid" && k !== "Lower" && k !== "NoPwr";
+});
+
+var rows = RAW.map(function(r){
+  var d = { date: parseDate(r.date), elev: +r.Elev || null };
+  TIER_CONFIG.forEach(function(t){ d[t.key] = +r[t.key] || null; });
+  projKeys.forEach(function(k){
+    var v = parseFloat(r[k]);
+    d[k] = isNaN(v) ? null : v;
+  });
+  return d;
+});
+
+var elevData = rows.filter(function(d){ return d.elev; });
+
+// ════════════════════════════════════════════════════
+//  DIMENSIONS
+// ════════════════════════════════════════════════════
+var margin = { top:18, right:18, bottom:78, left:62 },
+    H2     = 40,
+    totalW = Math.min(window.innerWidth - 230, 820),
+    W      = totalW - margin.left - margin.right,
+    H      = 380 - margin.top - margin.bottom;
+
+// ════════════════════════════════════════════════════
+//  SCALES
+// ════════════════════════════════════════════════════
+var xS  = d3.time.scale().range([0, W]);
+var xS2 = d3.time.scale().range([0, W]);
+var yS  = d3.scale.linear().range([H, 0]);
+
+xS.domain(d3.extent(rows, function(d){ return d.date; }));
+xS2.domain(xS.domain());
+
+var allVals = [];
+rows.forEach(function(d){
+  if (d.elev) allVals.push(d.elev);
+  projKeys.forEach(function(k){ if (d[k]) allVals.push(d[k]); });
+});
+yS.domain([d3.min(allVals) - 15, 3710]);
+
+var xAxis  = d3.svg.axis().scale(xS).orient("bottom").ticks(8);
+var xAxis2 = d3.svg.axis().scale(xS2).orient("bottom").ticks(5);
+var yAxis  = d3.svg.axis().scale(yS).orient("left").ticks(7)
+               .tickFormat(function(d){ return d3.format(",.0f")(d)+" ft"; });
+
+// ════════════════════════════════════════════════════
+//  SVG
+// ════════════════════════════════════════════════════
+var svg = d3.select("#chart").append("svg")
+    .attr("width",  W + margin.left + margin.right)
+    .attr("height", H + margin.top  + margin.bottom + H2 + 20)
+  .append("g")
+    .attr("transform","translate("+margin.left+","+margin.top+")");
+
+svg.append("defs").append("clipPath").attr("id","clip")
+  .append("rect").attr("width",W).attr("height",H+4);
+
+// Mouse tracker
+svg.append("rect").attr("id","mt")
+    .attr("width",W).attr("height",H)
+    .style("fill","transparent").style("cursor","crosshair");
+
+// ════════════════════════════════════════════════════
+//  TIER LINES
+// ════════════════════════════════════════════════════
+TIER_CONFIG.forEach(function(t){
+  var val = rows[0][t.key]; if (!val) return;
+  svg.append("line").attr("class","tier-line")
+      .attr("x1",0).attr("x2",W)
+      .attr("y1",yS(val)).attr("y2",yS(val))
+      .style("stroke", t.color)
+      .attr("clip-path","url(#clip)");
+});
+
+// ════════════════════════════════════════════════════
+//  LINE GENERATORS
+// ════════════════════════════════════════════════════
+function makeLineGen(accessor){
+  return d3.svg.line()
+    .interpolate("monotone")
+    .x(function(d){ return xS(d.date); })
+    .y(function(d){ return yS(accessor(d)); })
+    .defined(function(d){ return accessor(d) !== null; });
+}
+
+var elevLine = makeLineGen(function(d){ return d.elev; });
+
+// Draw area under observed line
+var elevArea = d3.svg.area()
+    .interpolate("monotone")
+    .x(function(d){ return xS(d.date); })
+    .y0(H).y1(function(d){ return yS(d.elev); })
+    .defined(function(d){ return d.elev; });
+
+svg.append("defs").append("linearGradient").attr("id","ag")
+    .attr("x1","0").attr("x2","0").attr("y1","0").attr("y2","1")
+    .call(function(g){
+      g.append("stop").attr("offset","0%").attr("stop-color","#2c2825").attr("stop-opacity",0.10);
+      g.append("stop").attr("offset","100%").attr("stop-color","#2c2825").attr("stop-opacity",0.01);
+    });
+
+var areaPath = svg.append("path")
+    .datum(elevData).attr("fill","url(#ag)")
+    .attr("clip-path","url(#clip)").attr("d", elevArea);
+
+var elevPath = svg.append("path")
+    .datum(elevData).attr("class","elev-main")
+    .attr("clip-path","url(#clip)").attr("d", elevLine);
+
+// ════════════════════════════════════════════════════
+//  PROJECTION LINES  (one per snapshot column)
+// ════════════════════════════════════════════════════
+var projState = {};   // key → { path, visible, color }
+
+projKeys.forEach(function(key, ci){
+  var color   = PROJ_COLORS[ci % PROJ_COLORS.length];
+  var lineGen = makeLineGen(function(d){ return d[key]; });
+
+  var path = svg.append("path")
+      .datum(rows)
+      .attr("class","proj-line")
+      .attr("clip-path","url(#clip)")
+      .attr("d", lineGen)
+      .style("stroke", color);
+
+  projState[key] = { path: path, lineGen: lineGen, visible: true, color: color };
+});
+
+// ════════════════════════════════════════════════════
+//  AXES
+// ════════════════════════════════════════════════════
+svg.append("g").attr("class","x axis")
+    .attr("transform","translate(0,"+H+")")
+    .call(xAxis);
+
+svg.append("g").attr("class","y axis").call(yAxis)
+  .append("text")
+    .attr("transform","rotate(-90)")
+    .attr("y",-54).attr("x",-8).attr("dy",".71em")
+    .style("text-anchor","end").style("fill","#9c9389").style("font-size","10px")
+    .text("Elevation (ft)");
+
+// ════════════════════════════════════════════════════
+//  BRUSH / CONTEXT
+// ════════════════════════════════════════════════════
+var ctxY = H + margin.top + margin.bottom - 14;
+var ctx  = svg.append("g").attr("transform","translate(0,"+ctxY+")");
+
+var ctxArea = d3.svg.area().interpolate("monotone")
+    .x(function(d){ return xS2(d.date); }).y0(H2).y1(0);
+
+ctx.append("path").datum(elevData).attr("class","context-area").attr("d", ctxArea);
+
+var brush = d3.svg.brush().x(xS2).on("brush", onBrush);
+
+ctx.append("g").attr("class","x axis").attr("transform","translate(0,"+H2+")")
+    .call(xAxis2);
+ctx.append("g").attr("class","x brush").call(brush)
+    .selectAll("rect").attr("height", H2);
+
+function onBrush(){
+  xS.domain(brush.empty() ? xS2.domain() : brush.extent());
+  svg.select(".x.axis").transition().call(xAxis);
+  redrawLines();
+}
+
+function redrawLines(){
+  elevPath.attr("d", elevLine(elevData));
+  areaPath.attr("d", elevArea(elevData));
+  projKeys.forEach(function(key){
+    var s = projState[key];
+    s.path.attr("d", s.lineGen(rows));
+  });
+  // Redraw tier lines x2 (they're fixed y, just stretch x)
+  svg.selectAll(".tier-line").attr("x2", W);
+}
+
+// ════════════════════════════════════════════════════
+//  HOVER / TOOLTIP
+// ════════════════════════════════════════════════════
+var hoverG = svg.append("g");
+var hoverLine = hoverG.append("line").attr("id","hover-line")
+    .attr("y1",0).attr("y2",H).style("opacity",1e-6).style("pointer-events","none");
+var hoverTxt = hoverG.append("text").attr("class","hover-date-text")
+    .attr("y",-5).style("opacity",1e-6);
+
+var tooltip = d3.select("#tooltip");
+
+d3.select("#mt")
+  .on("mousemove", function(){
+    var mx = d3.mouse(this)[0];
+    var x0 = xS.invert(mx);
+    var i  = bisectDate(rows, x0, 1);
+    if (i <= 0 || i >= rows.length) return;
+    var d0 = rows[i-1], d1 = rows[i];
+    var d  = (x0 - d0.date > d1.date - x0) ? d1 : d0;
+    if (!d || !d.date) return;
+
+    hoverLine.attr("x1",mx).attr("x2",mx).style("opacity",1);
+    hoverTxt.attr("x", mx < W-70 ? mx+6 : mx-64).text(fmtShort(d.date)).style("opacity",1);
+
+    var html = '<div class="tt-date">'+fmtLong(d.date)+'</div>';
+    if (d.elev) html += row("Observed", d.elev, true);
+    projKeys.forEach(function(key){
+      if (projState[key].visible && d[key] !== null)
+        html += rowColored(key.replace(/_/g," "), d[key], projState[key].color);
+    });
+
+    tooltip.html(html).style("opacity",1)
+      .style("left",(d3.event.clientX+16)+"px")
+      .style("top", (d3.event.clientY-20)+"px");
+  })
+  .on("mouseout", function(){
+    hoverLine.style("opacity",1e-6);
+    hoverTxt.style("opacity",1e-6);
+    tooltip.style("opacity",0);
+  });
+
+function row(label, val, hi){
+  return '<div class="tt-row"><span>'+label+'</span>' +
+         '<span class="tt-val'+(hi?" hi":"")+'">'+fmtN(val)+' ft</span></div>';
+}
+function rowColored(label, val, color){
+  return '<div class="tt-row"><span style="color:'+color+'">'+label+'</span>' +
+         '<span class="tt-val" style="color:'+color+'">'+fmtN(val)+' ft</span></div>';
+}
+
+// ════════════════════════════════════════════════════
+//  SIDEBAR TOGGLE ROWS
+// ════════════════════════════════════════════════════
+var toggleContainer = d3.select("#proj-toggles");
+
+projKeys.forEach(function(key){
+  var s     = projState[key];
+  var label = key.replace(/_/g," ");
+
+  var row = toggleContainer.append("div")
+      .attr("class","toggle-row on")
+      .attr("id","tr-"+key)
+      .on("click", function(){ toggleProj(key); });
+
+  row.append("div").attr("class","color-pill")
+      .style("background", s.color);
+
+  row.append("span").attr("class","lbl").text(label);
+
+  row.append("div").attr("class","check")
+      .style("background", s.color)
+      .html("✓");
+});
+
+// All / None buttons
+document.getElementById("btn-all").addEventListener("click", function(){
+  projKeys.forEach(function(k){ if (!projState[k].visible) toggleProj(k); });
+});
+document.getElementById("btn-none").addEventListener("click", function(){
+  projKeys.forEach(function(k){ if (projState[k].visible) toggleProj(k); });
+});
+
+function toggleProj(key){
+  var s = projState[key];
+  s.visible = !s.visible;
+
+  s.path.transition().duration(200)
+      .style("opacity", s.visible ? 1 : 0)
+      .style("display", null);
+
+  var rowEl = d3.select("#tr-"+key);
+  if (s.visible){
+    rowEl.attr("class","toggle-row on");
+    rowEl.select(".check").style("background", s.color).html("✓");
+    rowEl.select(".color-pill").style("background", s.color);
+  } else {
+    rowEl.attr("class","toggle-row off");
+    rowEl.select(".check").style("background","transparent").html("");
+    rowEl.select(".color-pill").style("background","#ccc");
+  }
+}
+</script>
 </body>
 </html>
